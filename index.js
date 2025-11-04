@@ -35,6 +35,22 @@ mongoose.connect(mongoURI)
   });
 
 // 라우트 설정
+// 루트 경로
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Vibe Todo Backend API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      users: '/api/users',
+      todos: '/api/todos',
+      activities: '/api/activities',
+      memo: '/api/memo'
+    }
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });

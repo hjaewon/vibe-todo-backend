@@ -51,6 +51,22 @@ app.get('/', (req, res) => {
   });
 });
 
+// /todo-backend 경로 추가
+app.get('/todo-backend', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Vibe Todo Backend API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      users: '/api/users',
+      todos: '/api/todos',
+      activities: '/api/activities',
+      memo: '/api/memo'
+    }
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });

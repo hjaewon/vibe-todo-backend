@@ -27,8 +27,20 @@ app.use(express.json());
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todo-backend';
 
 mongoose.connect(mongoURI)
-  .then(() => {
+  .then(async () => {
     console.log('MongoDB 연결 성공');
+    
+    // 기존 date_1 인덱스 삭제 (일회성 작업)
+    try {
+      const Activity = require('./models/Activity');
+      await Activity.collection.dropIndex('date_1');
+      console.log('기존 date_1 인덱스 삭제 완료');
+    } catch (error) {
+      // 인덱스가 없으면 에러 발생하지만 무시
+      if (error.code !== 27) { // 27 = IndexNotFound
+        console.log('date_1 인덱스 삭제 시도:', error.message);
+      }
+    }
   })
   .catch((err) => {
     console.error('MongoDB 연결 실패:', err);

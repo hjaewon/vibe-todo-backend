@@ -5,12 +5,22 @@ const Memo = require('../models/Memo');
 // 메모 조회
 router.get('/', async (req, res) => {
   try {
-    // 메모는 한 건만 존재
-    let memo = await Memo.findOne();
+    const { userId } = req.query;
+
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    // 사용자별 메모는 한 건만 존재
+    let memo = await Memo.findOne({ userId });
 
     // 메모가 없으면 빈 메모 생성
     if (!memo) {
-      memo = new Memo({ content: '' });
+      memo = new Memo({ userId, content: '' });
       await memo.save();
     }
 
@@ -30,10 +40,18 @@ router.get('/', async (req, res) => {
 // 메모 저장/수정
 router.post('/', async (req, res) => {
   try {
-    const { content } = req.body;
+    const { userId, content } = req.body;
+
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
 
     // 기존 메모 찾기
-    let memo = await Memo.findOne();
+    let memo = await Memo.findOne({ userId });
 
     if (memo) {
       // 기존 메모가 있으면 업데이트
@@ -41,7 +59,7 @@ router.post('/', async (req, res) => {
       await memo.save();
     } else {
       // 기존 메모가 없으면 새로 생성
-      memo = new Memo({ content: content || '' });
+      memo = new Memo({ userId, content: content || '' });
       await memo.save();
     }
 
@@ -62,13 +80,21 @@ router.post('/', async (req, res) => {
 // 메모 수정 (PUT 방식)
 router.put('/', async (req, res) => {
   try {
-    const { content } = req.body;
+    const { userId, content } = req.body;
 
-    let memo = await Memo.findOne();
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    let memo = await Memo.findOne({ userId });
 
     if (!memo) {
       // 메모가 없으면 새로 생성
-      memo = new Memo({ content: content || '' });
+      memo = new Memo({ userId, content: content || '' });
       await memo.save();
     } else {
       // 메모가 있으면 업데이트

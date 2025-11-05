@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
 const activitySchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true
+  },
   date: {
     type: String, // YYYY-MM-DD 형식
-    required: true,
-    unique: true // 날짜당 한 개의 문서만 존재
+    required: true
   },
   hour_09_10: {
     type: String,
@@ -65,6 +68,9 @@ const activitySchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// userId와 date 조합으로 복합 unique 인덱스 생성 (사용자별 날짜당 한 개의 문서만 존재)
+activitySchema.index({ userId: 1, date: 1 }, { unique: true });
 
 const Activity = mongoose.model('Activity', activitySchema);
 

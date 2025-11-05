@@ -5,10 +5,18 @@ const Activity = require('../models/Activity');
 // 모든 한일 조회 및 검색 (검색용)
 router.get('/', async (req, res) => {
   try {
-    const { search, startDate, endDate } = req.query;
+    const { userId, search, startDate, endDate } = req.query;
     
-    // 검색 조건 생성
-    let query = {};
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+    
+    // 검색 조건 생성 (userId 필수 포함)
+    let query = { userId };
     
     // 날짜 범위 필터 (선택사항)
     if (startDate || endDate) {
@@ -56,14 +64,24 @@ router.get('/', async (req, res) => {
 router.get('/:date', async (req, res) => {
   try {
     const { date } = req.params;
+    const { userId } = req.query;
 
-    let activity = await Activity.findOne({ date });
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    let activity = await Activity.findOne({ userId, date });
 
     // 해당 날짜의 데이터가 없으면 빈 데이터 반환
     if (!activity) {
       return res.json({
         success: true,
         data: {
+          userId,
           date,
           hour_09_10: '',
           hour_10_11: '',
@@ -100,6 +118,7 @@ router.get('/:date', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
+      userId,
       date,
       hour_09_10,
       hour_10_11,
@@ -117,6 +136,13 @@ router.post('/', async (req, res) => {
       hour_22_23
     } = req.body;
 
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
     if (!date) {
       return res.status(400).json({
         success: false,
@@ -124,10 +150,11 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // 날짜로 찾아서 있으면 수정, 없으면 생성
+    // userId와 날짜로 찾아서 있으면 수정, 없으면 생성
     const activity = await Activity.findOneAndUpdate(
-      { date },
+      { userId, date },
       {
+        userId,
         date,
         hour_09_10: hour_09_10 || '',
         hour_10_11: hour_10_11 || '',
@@ -170,6 +197,7 @@ router.put('/:date', async (req, res) => {
   try {
     const { date } = req.params;
     const {
+      userId,
       hour_09_10,
       hour_10_11,
       hour_11_12,
@@ -186,8 +214,15 @@ router.put('/:date', async (req, res) => {
       hour_22_23
     } = req.body;
 
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
     const activity = await Activity.findOneAndUpdate(
-      { date },
+      { userId, date },
       {
         hour_09_10: hour_09_10 || '',
         hour_10_11: hour_10_11 || '',

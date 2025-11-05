@@ -6,8 +6,17 @@ const Todo = require('../models/Todo');
 router.get('/date/:date', async (req, res) => {
   try {
     const { date } = req.params;
+    const { userId } = req.query;
 
-    const todos = await Todo.find({ date }).sort({ createdAt: 1 });
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    const todos = await Todo.find({ userId, date }).sort({ createdAt: 1 });
 
     res.json({
       success: true,
@@ -26,7 +35,17 @@ router.get('/date/:date', async (req, res) => {
 // 모든 할일 조회
 router.get('/', async (req, res) => {
   try {
-    const todos = await Todo.find().sort({ date: -1, createdAt: 1 });
+    const { userId } = req.query;
+
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    const todos = await Todo.find({ userId }).sort({ date: -1, createdAt: 1 });
 
     res.json({
       success: true,
@@ -45,7 +64,14 @@ router.get('/', async (req, res) => {
 // 새로운 할일 생성
 router.post('/', async (req, res) => {
   try {
-    const { date, task } = req.body;
+    const { userId, date, task } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
 
     if (!date || !task) {
       return res.status(400).json({
@@ -55,6 +81,7 @@ router.post('/', async (req, res) => {
     }
 
     const todo = new Todo({
+      userId,
       date,
       task,
       completed: false
@@ -171,8 +198,17 @@ router.delete('/:id', async (req, res) => {
 router.delete('/date/:date/completed', async (req, res) => {
   try {
     const { date } = req.params;
+    const { userId } = req.query;
 
-    const result = await Todo.deleteMany({ date, completed: true });
+    // userId 필수 체크
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId를 입력해주세요'
+      });
+    }
+
+    const result = await Todo.deleteMany({ userId, date, completed: true });
 
     res.json({
       success: true,
